@@ -1,0 +1,25 @@
+name: Deploy to Development
+
+on:
+  pull_request:
+    branches: [ development_server ]
+
+jobs:
+  checkout-and-prepare:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+      #Future Code Test Here
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Install Docker CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+
