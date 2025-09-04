@@ -35,9 +35,8 @@ This project follows a modern DevOps lifecycle to ensure high quality and rapid 
 
 You can include your workflow diagram here for visual reference:
 
-```
 ![DevOps Workflow Diagram](/diagram.png)
-```
+
 
 ## API Endpoints
 
