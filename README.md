@@ -9,108 +9,36 @@ A modern, mobile-friendly visitor log application where people can sign in and v
 - 📊 Real-time visitor statistics
 - 📱 Mobile-first responsive design
 - 🎨 Modern UI with smooth animations
+- ⚙️ CI/CD with GitHub Actions
 - 🐳 Fully dockerized with Docker Compose
 
-## Quick Start with Docker
+## DevOps & CI/CD
 
-### Prerequisites
+- **Continuous Integration:** Automated testing and linting on every push using [GitHub Actions](.github/workflows/ci.yml).
+- **Continuous Deployment:** Easy deploy to cloud platforms.
+- **Golden AMI:** Golden AMI creation using Hashicorp Packer for consistent, secure infrastructure images.
+- **Monitoring & Health Checks:** `/api/health` endpoint for service health.
 
-- Docker
-- Docker Compose
+### DevOps Lifecycle
 
-### Running the Application
+This project follows a modern DevOps lifecycle to ensure high quality and rapid delivery:
 
-1. Clone the repository and navigate to the project directory
+1. **Plan:** Define features, requirements, and improvements.
+2. **Code:** Develop features and fixes using Git, with code reviews and collaboration.
+3. **Build:** Automated builds and dependency management using Docker and CI pipelines.
+4. **Release:** Build artifacts and Docker images are created and versioned.
+5. **Deploy:** Automated deployment.
+6. **Operate:** Application runs in a monitored environment with health checks and logging.
+7. **Monitor:** Continuous monitoring, alerting, and feedback for improvement.
 
-2. Start the entire application stack:
-   ```bash
-   docker-compose up -d
-   ```
+### Workflow Diagram
 
-3. The application will be available at:
-   - Frontend: http://localhost
-   - Backend API: http://localhost:3001
-   - Database: localhost:5432
-
-4. To stop the application:
-   ```bash
-   docker-compose down
-   ```
-
-5. To stop and remove all data:
-   ```bash
-   docker-compose down -v
-   ```
-
-### Development Mode
-
-For development with hot reloading:
-
-```bash
-# Start only the database
-docker-compose -f docker-compose.dev.yml up database -d
-
-# Run backend and frontend locally
-npm install
-npm run dev:full
-```
-
-## Manual Setup Instructions (Alternative)
-
-### Prerequisites
-
-- Node.js (v16 or higher)
-- PostgreSQL database
-
-### Database Setup
-
-1. Create a PostgreSQL database named `visitor_log`
-2. Run the SQL commands in `server/database.sql` to create the required tables
-3. Update the database connection details in `.env`
-
-### Environment Variables
-
-Create a `.env` file and update with your database credentials:
+You can include your workflow diagram here for visual reference:
 
 ```
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=visitor_log
-DB_USER=your_username
-DB_PASSWORD=your_password
-PORT=3001
+![DevOps Workflow Diagram](./diagram.png)
 ```
-
-### Running the Application
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Start both frontend and backend:
-   ```bash
-   npm run dev:full
-   ```
-
-   Or run them separately:
-   ```bash
-   # Terminal 1 - Backend
-   npm run server
-   
-   # Terminal 2 - Frontend
-   npm run dev
-   ```
-
-3. Open http://localhost:5173 in your browser
-
-## Docker Services
-
-- **Frontend**: Nginx serving the built React app on port 80
-- **Backend**: Node.js/Express API server on port 3001
-- **Database**: PostgreSQL 15 on port 5432
-
-The database is automatically initialized with the required schema on first startup.
+*Replace `path/to/your/workflow-diagram.png` with the actual path to your diagram image.*
 
 ## API Endpoints
 

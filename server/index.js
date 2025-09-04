@@ -64,8 +64,24 @@ app.post('/api/visitors', async (req, res) => {
   }
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  // Check database connectivity
+  try {
+    await pool.query('SELECT 1');
+    res.json({
+      status: 'OK',
+      database: 'connected',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Database health check failed:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      database: 'disconnected',
+      timestamp: new Date().toISOString(),
+      error: error.message,
+    });
+  }
 });
 
 app.listen(port, () => {
