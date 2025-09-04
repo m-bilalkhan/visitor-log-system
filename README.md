@@ -36,9 +36,8 @@ This project follows a modern DevOps lifecycle to ensure high quality and rapid 
 You can include your workflow diagram here for visual reference:
 
 ```
-![DevOps Workflow Diagram](./diagram.png)
+![DevOps Workflow Diagram](/diagram.png)
 ```
-*Replace `path/to/your/workflow-diagram.png` with the actual path to your diagram image.*
 
 ## API Endpoints
 
