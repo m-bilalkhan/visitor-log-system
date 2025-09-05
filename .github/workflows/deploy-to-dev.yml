@@ -46,3 +46,6 @@ jobs:
           file: ./Dockerfile.frontend
           push: true
           tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}-frontend:dev-${{ env.SHORT_SHA }}
+
+      - name: Build AWS Ami build
+
