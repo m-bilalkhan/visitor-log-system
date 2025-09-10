@@ -37,7 +37,7 @@ jobs:
           context: .
           file: ./Dockerfile.backend
           push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}-backend:dev-${{ env.SHORT_SHA }}
+          tags: visitors-logs-systems/backend:dev-${{ env.SHORT_SHA }}
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v4
@@ -45,7 +45,7 @@ jobs:
           context: .
           file: ./Dockerfile.frontend
           push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}-frontend:dev-${{ env.SHORT_SHA }}
+          tags: visitors-logs-systems/frontend:dev-${{ env.SHORT_SHA }}
 
       - name: Build AWS Ami build
         uses: hashicorp/packer-github-actions@v2.1.0
@@ -55,11 +55,6 @@ jobs:
           options: >
             -var "region=${{ secrets.AWS_REGION }}"
             -var "instance_type=${{ secrets.INSTANCE_TYPE }}"
-            -var "db_host=${{ secrets.DB_HOST }}"
-            -var "db_port=${{ secrets.DB_PORT }}"
-            -var "db_name=${{ secrets.DB_NAME }}"
-            -var "db_user=${{ secrets.DB_USER }}"
-            -var "db_password=${{ secrets.DB_PASSWORD }}"
             -var "tag_name=dev-${{ env.SHORT_SHA }}"
 
       - name: Deploy to Dev (Trigger External Pipeline)

@@ -11,25 +11,18 @@ packer {
 
 variable "region" {
   type    = string
-  default = "us-east-1"
 }
-
 variable "instance_type" {
   type    = string
   default = "t2.micro"
 }
-
-variable "db_host"      { type = string }
-variable "db_port"      { type = string }
-variable "db_name"      { type = string }
-variable "db_user"      { type = string }
-variable "db_password"  { type = string }
 variable "tag_name"     { type = string }
+variable "environment"  { type = string }
 
 source "amazon-ebs" "al2" {
   region                  = var.region
   instance_type           = var.instance_type
-  ami_name                = "visitor-logs-system:{{var.environment}}"
+  ami_name                = "visitor-logs-system:${var.environment}"
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-*-x86_64-gp2"
@@ -49,11 +42,6 @@ build {
   provisioner "shell" {
     inline = [
       "cat <<EOF > /home/ec2-user/.env",
-      "DB_HOST=${var.db_host}",
-      "DB_PORT=${var.db_port}",
-      "DB_NAME=${var.db_name}",
-      "DB_USER=${var.db_user}",
-      "DB_PASSWORD=${var.db_password}",
       "TAG_NAME=${var.tag_name}",
       "EOF"
     ]
@@ -86,10 +74,8 @@ build {
   provisioner "shell" {
     inline = [
       "sudo bash -c 'cat > /etc/systemd/system/docker-compose-app.service <<EOF\n[Unit]\nDescription=Docker Compose App\nRequires=docker.service\nAfter=docker.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nWorkingDirectory=/home/ec2-user\nExecStart=/usr/bin/docker compose up -d\nExecStop=/usr/bin/docker compose down\n\n[Install]\nWantedBy=multi-user.target\nEOF'",
-
-      # Enable and start service
+      # Enable service
       "sudo systemctl daemon-reload",
-      "sudo systemctl enable docker-compose-app.service"
     ]
   }
 }
