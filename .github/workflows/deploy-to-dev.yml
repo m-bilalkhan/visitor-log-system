@@ -48,4 +48,29 @@ jobs:
           tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}-frontend:dev-${{ env.SHORT_SHA }}
 
       - name: Build AWS Ami build
+        uses: hashicorp/packer-github-actions@v2.1.0
+        with:
+          command: build
+          working-directory: ./packer
+          options: >
+            -var "region=${{ secrets.AWS_REGION }}"
+            -var "instance_type=${{ secrets.INSTANCE_TYPE }}"
+            -var "db_host=${{ secrets.DB_HOST }}"
+            -var "db_port=${{ secrets.DB_PORT }}"
+            -var "db_name=${{ secrets.DB_NAME }}"
+            -var "db_user=${{ secrets.DB_USER }}"
+            -var "db_password=${{ secrets.DB_PASSWORD }}"
+            -var "tag_name=dev-${{ env.SHORT_SHA }}"
 
+      - name: Deploy to Dev (Trigger External Pipeline)
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.EXTERNAL_REPO_TOKEN }}
+          repository: m-bilalkhan/visitor-log-system-iac
+          event-type: deploy-to-dev
+          client-payload: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "ami_id": "${{ steps.packer.outputs.ami_id }}",
+            }
