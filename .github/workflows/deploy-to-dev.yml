@@ -10,7 +10,7 @@ jobs:
     environment: development
     strategy:
       matrix:
-        region: ${{ secrets.AWS_REGIONS }}
+        region: ${{ fromJSON(secrets.AWS_REGIONS)` }}
     permissions:
       id-token: write
       contents: read
