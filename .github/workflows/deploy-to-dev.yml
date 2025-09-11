@@ -47,15 +47,16 @@ jobs:
           push: true
           tags: visitors-logs-systems/frontend:dev-${{ env.SHORT_SHA }}
 
-      - name: Build AWS Ami build
-        uses: hashicorp/packer-github-actions@v2.1.0
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v2
         with:
-          command: build
-          working-directory: ./packer
-          options: >
-            -var "region=${{ secrets.AWS_REGION }}"
-            -var "instance_type=${{ secrets.INSTANCE_TYPE }}"
-            -var "tag_name=dev-${{ env.SHORT_SHA }}"
+          version: latest
+
+      - name: Validate Packer template
+        run: packer validate ./packer/visitor-logs-system-ami.pkr.hcl
+
+      - name: Build AWS Ami build
+        run: packer build -var "region=${{ secrets.AWS_REGION }}" -var "instance_type=${{ secrets.INSTANCE_TYPE }} -var "tag_name=dev-${{ env.SHORT_SHA }}" ./packer/template.pkr.hcl
 
       - name: Deploy to Dev (Trigger External Pipeline)
         uses: peter-evans/repository-dispatch@v3
