@@ -5,16 +5,27 @@ on:
     branches: [ development_server ]
 
 jobs:
-  build-and-deploy-dev:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      regions: ${{ steps.set-regions.outputs.regions }}
+    steps:
+      - name: Set regions output from secret
+        id: set-regions
+        run: echo "regions=${{ secrets.AWS_REGIONS }}" >> $GITHUB_OUTPUT
+
+  build-images-and-amis:
+    needs: prepare-matrix
     runs-on: ubuntu-latest
     environment: development
     strategy:
       matrix:
-        region: ${{ fromJSON(secrets.AWS_REGIONS) }}
+        region: ${{ fromJSON(needs.prepare-matrix.outputs.regions) }}
     permissions:
       id-token: write
       contents: read
-
+    outputs:
+      ami_${{ matrix.region }}: ${{ steps.packer_build.outputs.ami_id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,7 +46,7 @@ jobs:
 
       - name: Extract short SHA
         id: vars
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Build and push backend Docker image
         uses: docker/build-push-action@v4
@@ -43,7 +54,7 @@ jobs:
           context: .
           file: ./Dockerfile.backend
           push: true
-          tags: visitors-logs-systems/backend:dev-${{ env.SHORT_SHA }}
+          tags: visitors-logs-systems/backend:dev-${{ steps.vars.outputs.SHORT_SHA }}
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v4
@@ -51,7 +62,7 @@ jobs:
           context: .
           file: ./Dockerfile.frontend
           push: true
-          tags: visitors-logs-systems/frontend:dev-${{ env.SHORT_SHA }}
+          tags: visitors-logs-systems/frontend:dev-${{ steps.vars.outputs.SHORT_SHA }}
 
       - name: Setup Packer
         uses: hashicorp/setup-packer@v2
@@ -61,10 +72,40 @@ jobs:
       - name: Validate Packer template
         run: packer validate ./packer/visitor-logs-system-ami.pkr.hcl
 
-      - name: Build AWS Ami build
-        run: packer build -var "region=${{ matrix.region }}" -var "instance_type=${{ secrets.INSTANCE_TYPE }} -var "tag_name=dev-${{ env.SHORT_SHA }}" ./packer/template.pkr.hcl
+      - name: Build AWS AMI (packer) and capture AMI id
+        id: packer_build
+        run: |
+          set -euo pipefail
+          packer build -machine-readable \
+            -var "region=${{ matrix.region }}" \
+            -var "instance_type=${{ secrets.INSTANCE_TYPE }}" \
+            -var "tag_name=dev-${{ steps.vars.outputs.SHORT_SHA }}" \
+            ./packer/template.pkr.hcl | tee /tmp/packer.out
 
-      - name: Deploy to Dev (Trigger External Pipeline)
+          AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
+          AMI_ID="${AMI_LINE#*:}"
+
+          echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
+
+  dispatch-to-external:
+    needs: [prepare-matrix, build-images-and-amis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect AMI IDs JSON
+        id: collect
+        run: |
+          regions='${{ needs.prepare-matrix.outputs.regions }}'
+          out="{\"regions\":{"
+          sep=""
+          for r in $(echo "$regions" | jq -r '.[]'); do
+            ami_id=$(jq -r ".\"ami_${r}\"" <<< '${{ toJSON(needs.build-images-and-amis.outputs) }}')
+            out="$out$sep\"$r\":\"$ami_id\""
+            sep=","
+          done
+          out="$out}}"
+          echo "payload=$out" >> $GITHUB_OUTPUT
+
+      - name: Dispatch event with AMIs
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.EXTERNAL_REPO_TOKEN }}
@@ -74,5 +115,6 @@ jobs:
             {
               "sha": "${{ github.sha }}",
               "ref": "${{ github.ref }}",
-              "ami_id": "${{ steps.packer.outputs.ami_id }}",
+              "amis": ${{ steps.collect.outputs.payload }},
+              "tag": "dev-${{ github.sha }}"
             }
