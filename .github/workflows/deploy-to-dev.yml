@@ -8,6 +8,12 @@ jobs:
   build-and-deploy-dev:
     runs-on: ubuntu-latest
     environment: development
+    strategy:
+      matrix:
+        region: [${{ secrets.AWS_REGIONS }}]
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -17,7 +23,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ matrix.region }}
           role-session-name: github-actions-session
 
       - name: Set up Docker Buildx
@@ -56,7 +62,7 @@ jobs:
         run: packer validate ./packer/visitor-logs-system-ami.pkr.hcl
 
       - name: Build AWS Ami build
-        run: packer build -var "region=${{ secrets.AWS_REGION }}" -var "instance_type=${{ secrets.INSTANCE_TYPE }} -var "tag_name=dev-${{ env.SHORT_SHA }}" ./packer/template.pkr.hcl
+        run: packer build -var "region=${{ matrix.region }}" -var "instance_type=${{ secrets.INSTANCE_TYPE }} -var "tag_name=dev-${{ env.SHORT_SHA }}" ./packer/template.pkr.hcl
 
       - name: Deploy to Dev (Trigger External Pipeline)
         uses: peter-evans/repository-dispatch@v3

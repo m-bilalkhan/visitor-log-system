@@ -38,7 +38,6 @@ build {
   name    = "docker-compose-app"
   sources = ["source.amazon-ebs.al2"]
 
-  # Create .env file for environment variables
   provisioner "shell" {
     inline = [
       "cat <<EOF > /home/ec2-user/.env",
@@ -47,7 +46,6 @@ build {
     ]
   }
 
-  # Install Docker & Docker Compose
   provisioner "shell" {
     inline = [
       "sudo yum update -y",
@@ -64,13 +62,11 @@ build {
     ]
   }
 
-  # Copy your docker-compose.yml into instance
   provisioner "file" {
     source      = "./docker-compose.yml"
     destination = "/home/ec2-user/docker-compose.yml"
   }
 
-  # Set up systemd service to run docker compose on boot
   provisioner "shell" {
     inline = [
       "sudo bash -c 'cat > /etc/systemd/system/docker-compose-app.service <<EOF\n[Unit]\nDescription=Docker Compose App\nRequires=docker.service\nAfter=docker.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nWorkingDirectory=/home/ec2-user\nExecStart=/usr/bin/docker compose up -d\nExecStop=/usr/bin/docker compose down\n\n[Install]\nWantedBy=multi-user.target\nEOF'",
