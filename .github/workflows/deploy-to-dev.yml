@@ -39,7 +39,7 @@ jobs:
           context: .
           file: ./Dockerfile.backend
           push: true
-          tags: visitors-logs-systems/backend:dev-${{ steps.vars.outputs.SHORT_SHA }}
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/visitors-logs-systems/backend:dev-${{ steps.vars.outputs.SHORT_SHA }}
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v4
@@ -47,7 +47,7 @@ jobs:
           context: .
           file: ./Dockerfile.frontend
           push: true
-          tags: visitors-logs-systems/frontend:dev-${{ steps.vars.outputs.SHORT_SHA }}
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/visitors-logs-systems/frontend:dev-${{ steps.vars.outputs.SHORT_SHA }}
 
       - name: Setup Packer
         uses: hashicorp/setup-packer@v2
