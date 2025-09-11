@@ -5,27 +5,12 @@ on:
     branches: [ development_server ]
 
 jobs:
-  prepare-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      regions: ${{ steps.set-regions.outputs.regions }}
-    steps:
-      - name: Set regions output from secret
-        id: set-regions
-        run: echo "regions=${{ secrets.AWS_REGIONS }}" >> $GITHUB_OUTPUT
-
-  build-images-and-amis:
-    needs: prepare-matrix
+  build-images-and-ami:
     runs-on: ubuntu-latest
     environment: development
-    strategy:
-      matrix:
-        region: ${{ fromJSON(needs.prepare-matrix.outputs.regions) }}
     permissions:
       id-token: write
       contents: read
-    outputs:
-      ami_${{ matrix.region }}: ${{ steps.packer_build.outputs.ami_id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,7 +19,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
-          aws-region: ${{ matrix.region }}
+          aws-region: ap-south-1
           role-session-name: github-actions-session
 
       - name: Set up Docker Buildx
@@ -77,35 +62,19 @@ jobs:
         run: |
           set -euo pipefail
           packer build -machine-readable \
-            -var "region=${{ matrix.region }}" \
+            -var "region=ap-south-1" \
             -var "instance_type=${{ secrets.INSTANCE_TYPE }}" \
             -var "tag_name=dev-${{ steps.vars.outputs.SHORT_SHA }}" \
             ./packer/template.pkr.hcl | tee /tmp/packer.out
-
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
-
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
 
   dispatch-to-external:
-    needs: [prepare-matrix, build-images-and-amis]
+    needs: build-images-and-ami
     runs-on: ubuntu-latest
     steps:
-      - name: Collect AMI IDs JSON
-        id: collect
-        run: |
-          regions='${{ needs.prepare-matrix.outputs.regions }}'
-          out="{\"regions\":{"
-          sep=""
-          for r in $(echo "$regions" | jq -r '.[]'); do
-            ami_id=$(jq -r ".\"ami_${r}\"" <<< '${{ toJSON(needs.build-images-and-amis.outputs) }}')
-            out="$out$sep\"$r\":\"$ami_id\""
-            sep=","
-          done
-          out="$out}}"
-          echo "payload=$out" >> $GITHUB_OUTPUT
-
-      - name: Dispatch event with AMIs
+      - name: Dispatch event with AMI
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.EXTERNAL_REPO_TOKEN }}
@@ -115,6 +84,6 @@ jobs:
             {
               "sha": "${{ github.sha }}",
               "ref": "${{ github.ref }}",
-              "amis": ${{ steps.collect.outputs.payload }},
+              "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}",
               "tag": "dev-${{ github.sha }}"
             }
