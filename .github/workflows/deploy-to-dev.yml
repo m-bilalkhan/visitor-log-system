@@ -5,7 +5,8 @@ on:
     branches: [ development_server ]
 
 jobs:
-  build-images-and-ami:
+  build-images-and-push-to-ecr:
+    name: Build Docker Images and Push to ECR
     runs-on: ubuntu-latest
     environment: development
     permissions:
@@ -35,7 +36,7 @@ jobs:
 
 
       - name: Build, tag, and push the backend image to Amazon ECR
-        id: build-image
+        id: build-backend-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: "visitors-logs-systems/backend"
@@ -44,18 +45,41 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.backend .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Build and push frontend Docker image
-        uses: docker/build-push-action@v4
+      - name: Build, tag, and push the frontend image to Amazon ECR
+        id: build-frontend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "visitors-logs-systems/backend"
+          IMAGE_TAG: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.backend .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    outputs:
+      SHORT_SHA: ${{ steps.vars.outputs.SHORT_SHA }}
+  
+  build-ami:
+    needs: build-images-and-push-to-ecr
+    name: Build AWS AMI using Packer
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (Assume Role)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          context: .
-          file: ./Dockerfile.frontend
-          push: true
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/visitors-logs-systems/frontend:dev-${{ steps.vars.outputs.SHORT_SHA }}
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          aws-region: ap-south-1
+          role-session-name: github-actions-session
 
       - name: Setup Packer
         uses: hashicorp/setup-packer@v2
         with:
           version: latest
+
+      - name: Initialize Packer plugins
+        run: packer init ./packer/visitor-logs-system-ami.pkr.hcl
 
       - name: Validate Packer template
         run: packer validate ./packer/visitor-logs-system-ami.pkr.hcl
@@ -67,7 +91,7 @@ jobs:
           packer build -machine-readable \
             -var "region=ap-south-1" \
             -var "instance_type=${{ secrets.INSTANCE_TYPE }}" \
-            -var "tag_name=dev-${{ steps.vars.outputs.SHORT_SHA }}" \
+            -var "tag_name=dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}" \
             ./packer/template.pkr.hcl | tee /tmp/packer.out
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
@@ -88,5 +112,5 @@ jobs:
               "sha": "${{ github.sha }}",
               "ref": "${{ github.ref }}",
               "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}",
-              "tag": "dev-${{ github.sha }}"
+              "tag": "dev-${{ needs.build-images-and-ami.outputs.short_sha }}"
             }
