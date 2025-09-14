@@ -41,7 +41,7 @@ jobs:
           ECR_REPOSITORY: "visitors-logs-systems/backend"
           IMAGE_TAG: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./../../Dockerfile.backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.backend .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Build and push frontend Docker image
