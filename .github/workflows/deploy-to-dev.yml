@@ -89,7 +89,7 @@ jobs:
           tag_name    = "dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           environment = "dev"
           EOF
-
+        
 
       - name: Initialize Packer plugins
         working-directory: ./packer
@@ -97,15 +97,15 @@ jobs:
 
       - name: Validate Packer template
         working-directory: ./packer
-        run: packer validate visitor-logs-system-ami.pkr.hcl
+        run: packer validate -var-file=variables.auto.pkrvars.hcl visitor-logs-system-ami.pkr.hcl
 
       - name: Build AWS AMI (packer) and capture AMI id
         working-directory: ./packer
         id: packer_build
         run: |
           set -euo pipefail
-          packer build -machine-readable \
-            ./packer/visitor-logs-system-ami.pkr.hcl | tee /tmp/packer.out
+          packer build -machine-readable -var-file=variables.auto.pkrvars.hcl \
+            ./visitor-logs-system-ami.pkr.hcl | tee /tmp/packer.out
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
