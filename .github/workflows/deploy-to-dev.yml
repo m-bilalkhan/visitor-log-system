@@ -62,6 +62,9 @@ jobs:
     name: Build AWS AMI using Packer
     runs-on: ubuntu-latest
     environment: development
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
