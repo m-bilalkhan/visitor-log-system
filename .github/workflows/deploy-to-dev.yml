@@ -81,6 +81,16 @@ jobs:
         with:
           version: latest
 
+      - name: Generate Packer variables file
+        run: |
+          cat > ./packer/variables.auto.pkrvars.hcl <<EOF
+          region      = "ap-south-1"
+          instance_type = "${{ secrets.INSTANCE_TYPE }}"
+          tag_name    = "dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
+          environment = "dev"
+          EOF
+
+
       - name: Initialize Packer plugins
         run: packer init ./packer/visitor-logs-system-ami.pkr.hcl
 
@@ -92,9 +102,6 @@ jobs:
         run: |
           set -euo pipefail
           packer build -machine-readable \
-            -var "region=ap-south-1" \
-            -var "instance_type=${{ secrets.INSTANCE_TYPE }}" \
-            -var "tag_name=dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}" \
             ./packer/template.pkr.hcl | tee /tmp/packer.out
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
