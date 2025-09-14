@@ -92,12 +92,15 @@ jobs:
 
 
       - name: Initialize Packer plugins
+        working-directory: ./packer
         run: packer init ./packer/visitor-logs-system-ami.pkr.hcl
 
       - name: Validate Packer template
+        working-directory: ./packer
         run: packer validate ./packer/visitor-logs-system-ami.pkr.hcl
 
       - name: Build AWS AMI (packer) and capture AMI id
+        working-directory: ./packer
         id: packer_build
         run: |
           set -euo pipefail
