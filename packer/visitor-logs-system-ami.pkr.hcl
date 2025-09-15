@@ -20,7 +20,7 @@ variable "tag_name"     { type = string }
 variable "environment"  { type = string }
 
 source "amazon-ebs" "al2" {
-  communicator            = "none" 
+  communicator            = "ssh" 
   region                  = var.region
   instance_type           = var.instance_type
   ami_name                = "visitor-logs-system-${var.environment}"
