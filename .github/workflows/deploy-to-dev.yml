@@ -89,7 +89,6 @@ jobs:
           tag_name    = "dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           environment = "dev"
           EOF
-        
 
       - name: Initialize Packer plugins
         working-directory: ./packer

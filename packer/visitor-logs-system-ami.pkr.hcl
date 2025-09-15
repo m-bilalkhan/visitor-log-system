@@ -22,7 +22,7 @@ variable "environment"  { type = string }
 source "amazon-ebs" "al2" {
   region                  = var.region
   instance_type           = var.instance_type
-  ami_name                = "visitor-logs-system:${var.environment}"
+  ami_name                = "visitor-logs-system-${var.environment}"
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-*-x86_64-gp2"
@@ -32,6 +32,7 @@ source "amazon-ebs" "al2" {
     owners      = ["137112412989"] # Amazon
     most_recent = true
   }
+  ssh_username          = "ec2-user"
 }
 
 build {
