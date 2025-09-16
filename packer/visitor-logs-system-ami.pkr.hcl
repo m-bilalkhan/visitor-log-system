@@ -23,7 +23,7 @@ source "amazon-ebs" "al2" {
   communicator            = "ssh" 
   region                  = var.region
   instance_type           = var.instance_type
-  ami_name                = "visitor-logs-system-${var.environment}"
+  ami_name                = "visitor-log-system-${var.environment}"
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-*-x86_64-gp2"
