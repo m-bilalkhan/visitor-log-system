@@ -58,9 +58,10 @@ build {
       "sudo usermod -aG docker ec2-user",
 
       # Install Docker Compose plugin (v2)
-      "mkdir -p ~/.docker/cli-plugins",
-      "curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose",
-      "chmod +x ~/.docker/cli-plugins/docker-compose"
+      "sudo -u ec2-user mkdir -p /home/ec2-user/.docker/cli-plugins",
+      "sudo -u ec2-user curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o /home/ec2-user/.docker/cli-plugins/docker-compose",
+      "sudo chmod +x /home/ec2-user/.docker/cli-plugins/docker-compose"
+
     ]
   }
 
