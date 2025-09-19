@@ -33,6 +33,13 @@ source "amazon-ebs" "al2" {
     owners      = ["137112412989"] # Amazon
     most_recent = true
   }
+  tags = {
+    Name        = "visitor-log-system-${var.environment}"
+    Environment = "${var.environment}"
+    Project     = "visitor-log-system"
+    Owner       = "bilal"
+    BuildTime   = "{{timestamp}}"
+  }
   ssh_username          = "ec2-user"
 }
 
