@@ -17,13 +17,17 @@ variable "instance_type" {
   default = "t2.micro"
 }
 variable "tag_name"     { type = string }
-variable "environment"  { type = string }
+
+locals {
+  timestamp = regex_replace(timestamp(), "[- TZ:]", "")
+  ami_name  = "visitor-log-system-${var.tag_name}-${local.timestamp}"
+}
 
 source "amazon-ebs" "al2" {
   communicator            = "ssh" 
   region                  = var.region
   instance_type           = var.instance_type
-  ami_name                = "visitor-log-system-${var.tag_name}"
+  ami_name                = local.ami_name
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-*-x86_64-gp2"
@@ -34,11 +38,10 @@ source "amazon-ebs" "al2" {
     most_recent = true
   }
   tags = {
-    Name        = "visitor-log-system-${var.environment}"
-    Environment = "${var.environment}"
     Project     = "visitor-log-system"
     Owner       = "bilal"
-    BuildTime   = "{{timestamp}}"
+    BuildTime   = "${local.timestamp}"
+    GitTag      = "${var.tag_name}"
   }
   ssh_username          = "ec2-user"
 }
