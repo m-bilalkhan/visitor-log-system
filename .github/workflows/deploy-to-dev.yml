@@ -124,6 +124,5 @@ jobs:
             {
               "sha": "${{ github.sha }}",
               "ref": "${{ github.ref }}",
-              "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}",
-              "tag": "dev-${{ needs.build-images-and-ami.outputs.short_sha }}"
+              "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}"
             }
