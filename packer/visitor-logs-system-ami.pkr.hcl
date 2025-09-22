@@ -58,33 +58,43 @@ build {
     ]
   }
 
+  # Install Docker + Compose
   provisioner "shell" {
     inline = [
       "sudo yum update -y",
       "sudo amazon-linux-extras enable docker",
-      "sudo yum install -y docker git",
+      "sudo yum install -y docker git -y",
       "sudo systemctl enable docker",
       "sudo systemctl start docker",
       "sudo usermod -aG docker ec2-user",
 
-      # Install Docker Compose plugin (v2)
-      "sudo -u ec2-user mkdir -p /home/ec2-user/.docker/cli-plugins",
-      "sudo -u ec2-user curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o /home/ec2-user/.docker/cli-plugins/docker-compose",
-      "sudo chmod +x /home/ec2-user/.docker/cli-plugins/docker-compose"
-
+      # Install Docker Compose plugin (v2) globally
+      "sudo mkdir -p /usr/libexec/docker/cli-plugins",
+      "curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o docker-compose",
+      "chmod +x docker-compose",
+      "sudo mv docker-compose /usr/libexec/docker/cli-plugins/docker-compose"
     ]
   }
 
+  # Copy docker-compose.yml
   provisioner "file" {
     source      = "./../docker-compose.yml"
     destination = "/home/ec2-user/docker-compose.yml"
   }
 
+  # Copy systemd unit file
+  provisioner "file" {
+    source      = "./files/docker-compose-app.service"
+    destination = "/tmp/docker-compose-app.service"
+  }
+
+  # Install and enable systemd service
   provisioner "shell" {
     inline = [
-      "sudo bash -c 'cat > /etc/systemd/system/docker-compose-app.service <<EOF\n[Unit]\nDescription=Docker Compose App\nRequires=docker.service\nAfter=docker.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nWorkingDirectory=/home/ec2-user\nExecStart=/usr/bin/docker compose up -d\nExecStop=/usr/bin/docker compose down\n\n[Install]\nWantedBy=multi-user.target\nEOF'",
-      # Enable service
-      "sudo systemctl daemon-reload",
+      "sudo mv /tmp/docker-compose-app.service /etc/systemd/system/docker-compose-app.service",
+      "sudo chown root:root /etc/systemd/system/docker-compose-app.service",
+      "sudo chmod 644 /etc/systemd/system/docker-compose-app.service",
+      "sudo systemctl daemon-reload"
     ]
   }
 }
