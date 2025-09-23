@@ -86,7 +86,7 @@ jobs:
           cat > ./packer/variables.auto.pkrvars.hcl <<EOF
           region      = "ap-south-1"
           instance_type = "${{ secrets.INSTANCE_TYPE }}"
-          tag_name    = "dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
+          tag_name    = "${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           environment = "dev"
           EOF
 
