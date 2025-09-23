@@ -54,6 +54,7 @@ build {
 
   provisioner "shell" {
     inline = [
+      "mkdir app",
       "cat <<EOF > /home/ec2-user/app/.env",
       "TAG_NAME=${var.tag_name}",
       "EOF"
