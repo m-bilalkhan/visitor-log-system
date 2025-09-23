@@ -4,12 +4,10 @@ Requires=docker.service
 After=docker.service
 
 [Service]
-Type=simple
-WorkingDirectory=/home/ec2-user
-ExecStart=/usr/bin/docker compose -f /home/ec2-user/docker-compose.yml up -d
-ExecStop=/usr/bin/docker compose -f /home/ec2-user/docker-compose.yml down
+WorkingDirectory=/home/ec2-user/app
+ExecStart=/usr/local/bin/docker-compose --env-file /home/ec2-user/app/.env up -d
+ExecStop=/usr/local/bin/docker-compose --env-file /home/ec2-user/app/.env down
 Restart=always
-User=ec2-user
 
 [Install]
 WantedBy=multi-user.target

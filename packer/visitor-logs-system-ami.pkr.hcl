@@ -17,6 +17,7 @@ variable "instance_type" {
   default = "t2.micro"
 }
 variable "tag_name"     { type = string }
+variable "environment"  { type = string }
 
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
@@ -42,8 +43,9 @@ source "amazon-ebs" "al2" {
     Owner       = "bilal"
     BuildTime   = "${local.timestamp}"
     GitTag      = "${var.tag_name}"
+    Env         = "${var.environment}"
   }
-  ssh_username          = "ec2-user"
+  ssh_username  = "ec2-user"
 }
 
 build {
@@ -52,7 +54,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "cat <<EOF > /home/ec2-user/.env",
+      "cat <<EOF > /home/ec2-user/app/.env",
       "TAG_NAME=${var.tag_name}",
       "EOF"
     ]
@@ -79,7 +81,7 @@ build {
   # Copy docker-compose.yml
   provisioner "file" {
     source      = "./../docker-compose.yml"
-    destination = "/home/ec2-user/docker-compose.yml"
+    destination = "/home/ec2-user/app/docker-compose.yml"
   }
 
   # Copy systemd unit file
@@ -94,7 +96,8 @@ build {
       "sudo mv /tmp/docker-compose-app.service /etc/systemd/system/docker-compose-app.service",
       "sudo chown root:root /etc/systemd/system/docker-compose-app.service",
       "sudo chmod 644 /etc/systemd/system/docker-compose-app.service",
-      "sudo systemctl daemon-reload"
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable docker-compose-app.service"
     ]
   }
 }
