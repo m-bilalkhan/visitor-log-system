@@ -52,6 +52,14 @@ build {
   name    = "docker-compose-app"
   sources = ["source.amazon-ebs.al2"]
 
+  provisioner "shell" {
+    inline = [
+      "cat <<EOF > /home/ec2-user/app/.env",
+      "TAG_NAME=${var.tag_name}",
+      "EOF"
+    ]
+  }
+
   # Install Docker + Compose
   provisioner "shell" {
     inline = [
