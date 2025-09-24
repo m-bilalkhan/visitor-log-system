@@ -13,9 +13,6 @@ services:
       PORT: 3001
     ports:
       - "3001:3001"
-    depends_on:
-      database:
-        condition: service_healthy
     restart: unless-stopped
     networks:
       - visitor-log-network
