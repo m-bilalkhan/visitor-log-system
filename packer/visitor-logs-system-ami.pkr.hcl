@@ -60,7 +60,7 @@ build {
       "cat <<EOF > /home/ec2-user/app/.env",
       "TAG_NAME=${var.tag_name}",
       "ECR_REG=${var.ecr_registry}",
-      "IMG_TAG=${var.img_tag}"
+      "IMG_TAG=${var.img_tag}",
       "EOF"
     ]
   }
