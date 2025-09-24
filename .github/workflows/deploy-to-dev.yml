@@ -127,4 +127,4 @@ jobs:
               "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}"
             }
       - name: AMI ID
-        run: "echo ${AMI_ID}"
+        run: echo "${AMI_ID}"
