@@ -5,8 +5,8 @@ After=docker.service
 
 [Service]
 WorkingDirectory=/home/ec2-user/app
-ExecStart=/usr/local/bin/docker-compose --env-file /home/ec2-user/app/.env up -d
-ExecStop=/usr/local/bin/docker-compose --env-file /home/ec2-user/app/.env down
+ExecStart=/usr/local/bin/docker compose --env-file /home/ec2-user/app/.env up -d
+ExecStop=/usr/local/bin/docker compose --env-file /home/ec2-user/app/.env down
 Restart=always
 
 [Install]
