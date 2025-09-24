@@ -49,10 +49,10 @@ jobs:
         id: build-frontend-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: "visitors-logs-systems/backend"
+          ECR_REPOSITORY: "visitors-logs-systems/frontend"
           IMAGE_TAG: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.backend .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.frontend .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     outputs:
       SHORT_SHA: ${{ steps.vars.outputs.SHORT_SHA }}
@@ -88,6 +88,8 @@ jobs:
           instance_type = "${{ secrets.INSTANCE_TYPE }}"
           tag_name    = "${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           environment = "dev"
+          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+          img_tag: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
           EOF
 
       - name: Initialize Packer plugins

@@ -18,6 +18,8 @@ variable "instance_type" {
 }
 variable "tag_name"     { type = string }
 variable "environment"  { type = string }
+variable "ecr_registry" { type = string }
+variable "img_tag"      { type = string }
 
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
@@ -57,6 +59,8 @@ build {
       "mkdir app",
       "cat <<EOF > /home/ec2-user/app/.env",
       "TAG_NAME=${var.tag_name}",
+      "ECR_REG=${var.ecr_registry}",
+      "IMG_TAG=${var.img_tag}"
       "EOF"
     ]
   }
