@@ -56,6 +56,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     outputs:
       SHORT_SHA: ${{ steps.vars.outputs.SHORT_SHA }}
+      ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
   
   build-ami:
     needs: build-images-and-push-to-ecr
@@ -88,8 +89,8 @@ jobs:
           instance_type = "${{ secrets.INSTANCE_TYPE }}"
           tag_name    = "${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           environment = "dev"
-          ecr_registry = ${{ steps.login-ecr.outputs.registry }}
-          img_tag = "dev-${{ steps.vars.outputs.SHORT_SHA }}"
+          ecr_registry = "${{ needs.build-images-and-push-to-ecr.outputs.ECR_REGISTRY }}"
+          img_tag = "dev-${{ needs.build-images-and-push-to-ecr.outputs.SHORT_SHA }}"
           EOF
 
       - name: Initialize Packer plugins
