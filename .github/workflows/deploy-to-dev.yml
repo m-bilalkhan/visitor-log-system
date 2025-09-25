@@ -111,6 +111,8 @@ jobs:
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
+    outputs:
+      AMI_ID: ${{ steps.packer_build.outputs.ami_id }}
 
   dispatch-to-external:
     needs: build-ami
@@ -127,7 +129,7 @@ jobs:
             {
               "sha": "${{ github.sha }}",
               "ref": "${{ github.ref }}",
-              "ami": "${{ needs.build-images-and-ami.outputs.ami_id }}"
+              "ami": "${{ needs.build-ami.outputs.AMI_ID }}"
             }
       - name: AMI ID
         run: echo "${AMI_ID}"
