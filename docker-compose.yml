@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ${ECR_REG}/visitor-log-backend:${IMG_TAG}
+    image: ${ECR_REG}/visitors-logs-systems/backend:${IMG_TAG}
     container_name: visitor-log-backend
     environment:
       DB_HOST: ${DB_HOST}
@@ -18,7 +18,7 @@ services:
       - visitor-log-network
 
   frontend:
-    image: ${ECR_REG}/visitor-log-frontend:${IMG_TAG}
+    image: ${ECR_REG}/visitors-logs-systems/frontend:${IMG_TAG}
     container_name: visitor-log-frontend
     ports:
       - "80:80"
