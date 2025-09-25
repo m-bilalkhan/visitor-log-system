@@ -33,7 +33,7 @@ This project follows a modern DevOps lifecycle to ensure high quality and rapid 
 
 ### Workflow Diagram
 
-You can include your workflow diagram here for visual reference:
+You can include your workflow diagrams here for visual reference:
 
 ![DevOps Workflow Diagram](/diagram.png)
 
