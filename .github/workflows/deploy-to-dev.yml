@@ -112,7 +112,7 @@ jobs:
           AMI_ID="${AMI_LINE#*:}"
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
     outputs:
-      AMI_ID: ${{ steps.packer_build.outputs.ami_id }}
+      AMI_ID: ${{ steps.packer_build.outputs.AMI_ID }}
 
   dispatch-to-external:
     needs: build-ami

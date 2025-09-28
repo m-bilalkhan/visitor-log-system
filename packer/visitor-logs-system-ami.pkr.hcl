@@ -95,6 +95,12 @@ build {
     destination = "/tmp/docker-compose-app.service"
   }
 
+  # Set permissions for ecr login
+  provisioner "file" {
+    source      = "./files/ecr-login.sh"
+    destination = "/home/ec2-user/app/ecr-login.sh"
+  }
+
   # Install and enable systemd service
   provisioner "shell" {
     inline = [
