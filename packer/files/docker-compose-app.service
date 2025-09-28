@@ -5,7 +5,7 @@ After=docker.service
 
 [Service]
 WorkingDirectory=/home/ec2-user/app
-ExecStartPre=/bin/chmod +x /home/ec2-user/app/ecr-login.sh
+ExecStartPre=/bin/bash ecr-login.sh
 ExecStart=/usr/bin/docker compose --env-file /home/ec2-user/app/.env up -d
 ExecStop=/usr/bin/docker compose --env-file /home/ec2-user/app/.env down
 Restart=always

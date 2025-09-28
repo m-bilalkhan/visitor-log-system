@@ -101,6 +101,17 @@ build {
     destination = "/home/ec2-user/app/ecr-login.sh"
   }
 
+  provisioner "shell" {
+    inline = [
+      "chmod +x /home/ec2-user/app/ecr-login.sh"
+    ]
+  }
+
+  provisioner "file" {
+    source      = "./../nginx.conf"
+    destination = "/home/ec2-user/app/nginx.conf"
+  }
+
   # Install and enable systemd service
   provisioner "shell" {
     inline = [
