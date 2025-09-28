@@ -119,17 +119,15 @@ jobs:
     name: Dispatch to External Repository with AMI ID
     runs-on: ubuntu-latest
     steps:
-      # - name: Dispatch event with AMI
-      #   uses: peter-evans/repository-dispatch@v3
-      #   with:
-      #     token: ${{ secrets.EXTERNAL_REPO_TOKEN }}
-      #     repository: m-bilalkhan/visitor-log-system-iac
-      #     event-type: deploy-to-dev
-      #     client-payload: |
-      #       {
-      #         "sha": "${{ github.sha }}",
-      #         "ref": "${{ github.ref }}",
-      #         "ami": "${{ needs.build-ami.outputs.ami_id }}"
-      #       }
-      - name: XYZ
-        run: echo "The AMI ID is ${{ needs.build-ami.outputs.ami_id }}"
+      - name: Dispatch event with AMI
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.EXTERNAL_REPO_TOKEN }}
+          repository: m-bilalkhan/visitor-log-system-iac
+          event-type: deploy-to-dev
+          client-payload: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "ami": "${{ needs.build-ami.outputs.ami_id }}"
+            }
