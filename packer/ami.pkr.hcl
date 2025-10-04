@@ -125,12 +125,12 @@ build {
   # Copy DB token update script
   provisioner "file" {
     source      = "./files/update-db-token.sh"
-    destination = "/usr/local/bin/update-db-token.sh"
+    destination = "/home/ec2-user/app/update-db-token.sh"
   }
 
   provisioner "shell" {
     inline = [
-      "chmod +x /usr/local/bin/update-db-token.sh"
+      "chmod +x /home/ec2-user/app/update-db-token.sh"
     ]
   } 
 
