@@ -3,4 +3,4 @@ Description=Update RDS IAM Auth Token
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/update-db-token.sh
+ExecStart=/bin/bash update-db-token.sh
