@@ -92,17 +92,17 @@ build {
   # Copy systemd unit file
   provisioner "file" {
     source      = "./files/docker-compose-app.service"
-    destination = "/etc/systemd/system/docker-compose-app.service"
+    destination = "/tmp/docker-compose-app.service"
   }
 
   provisioner "file" {
     source      = "./files/update-db-token.service"
-    destination = "/etc/systemd/system/update-db-token.service"
+    destination = "/tmp/update-db-token.service"
   }
 
   provisioner "file" {
     source      = "./files/update-db-token.timer"
-    destination = "/etc/systemd/system/update-db-token.timer"
+    destination = "/tmp/update-db-token.timer"
   }
 
   # Set permissions for ecr login
@@ -137,6 +137,9 @@ build {
   # Install and enable systemd service
   provisioner "shell" {
     inline = [
+      "sudo mv /tmp/docker-compose-app.service /etc/systemd/system/",
+      "sudo mv /tmp/update-db-token.service /etc/systemd/system/",
+      "sudo mv /tmp/update-db-token.timer /etc/systemd/system/",
       "sudo chown root:root /etc/systemd/system/docker-compose-app.service",
       "sudo chown root:root /etc/systemd/system/update-db-token.service",
       "sudo chown root:root /etc/systemd/system/update-db-token.timer",
