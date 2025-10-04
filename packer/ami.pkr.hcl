@@ -144,8 +144,8 @@ build {
       "sudo chmod 644 /etc/systemd/system/update-db-token.service",
       "sudo chmod 644 /etc/systemd/system/update-db-token.timer",
       "sudo systemctl daemon-reload",
-      "sudo systemctl enable docker-compose-app.service"
-      "sudo systemctl enable update-db-token.service"
+      "sudo systemctl enable docker-compose-app.service",
+      "sudo systemctl enable update-db-token.service",
       "sudo systemctl enable update-db-token.timer"
     ]
   }
