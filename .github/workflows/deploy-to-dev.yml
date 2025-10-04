@@ -39,7 +39,7 @@ jobs:
         id: build-backend-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: "visitors-logs-systems/backend"
+          ECR_REPOSITORY: "visitor-log-system/backend"
           IMAGE_TAG: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.backend .
@@ -49,7 +49,7 @@ jobs:
         id: build-frontend-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: "visitors-logs-systems/frontend"
+          ECR_REPOSITORY: "visitor-log-system/frontend"
           IMAGE_TAG: "dev-${{ steps.vars.outputs.SHORT_SHA }}"
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.frontend .
@@ -95,11 +95,11 @@ jobs:
 
       - name: Initialize Packer plugins
         working-directory: ./packer
-        run: packer init visitor-logs-system-ami.pkr.hcl
+        run: packer init ami.pkr.hcl
 
       - name: Validate Packer template
         working-directory: ./packer
-        run: packer validate -var-file=variables.auto.pkrvars.hcl visitor-logs-system-ami.pkr.hcl
+        run: packer validate -var-file=variables.auto.pkrvars.hcl ami.pkr.hcl
 
       - name: Build AWS AMI (packer) and capture AMI id
         working-directory: ./packer
@@ -107,7 +107,7 @@ jobs:
         run: |
           set -euo pipefail
           packer build -machine-readable -var-file=variables.auto.pkrvars.hcl \
-            ./visitor-logs-system-ami.pkr.hcl | tee /tmp/packer.out
+            ./ami.pkr.hcl | tee /tmp/packer.out
           AMI_LINE=$(awk -F, '/artifact,0,id/ { print $6 }' /tmp/packer.out | tail -n1)
           AMI_ID="${AMI_LINE#*:}"
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT

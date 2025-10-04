@@ -92,7 +92,17 @@ build {
   # Copy systemd unit file
   provisioner "file" {
     source      = "./files/docker-compose-app.service"
-    destination = "/tmp/docker-compose-app.service"
+    destination = "/etc/systemd/system/docker-compose-app.service"
+  }
+
+  provisioner "file" {
+    source      = "./files/update-db-token.service"
+    destination = "/etc/systemd/system/update-db-token.service"
+  }
+
+  provisioner "file" {
+    source      = "./files/update-db-token.timer"
+    destination = "/etc/systemd/system/update-db-token.timer"
   }
 
   # Set permissions for ecr login
@@ -112,14 +122,31 @@ build {
     destination = "/home/ec2-user/app/nginx.conf"
   }
 
+  # Copy DB token update script
+  provisioner "file" {
+    source      = "./files/update-db-token.sh"
+    destination = "/usr/local/bin/update-db-token.sh"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "chmod +x /usr/local/bin/update-db-token.sh"
+    ]
+  } 
+
   # Install and enable systemd service
   provisioner "shell" {
     inline = [
-      "sudo mv /tmp/docker-compose-app.service /etc/systemd/system/docker-compose-app.service",
       "sudo chown root:root /etc/systemd/system/docker-compose-app.service",
+      "sudo chown root:root /etc/systemd/system/update-db-token.service",
+      "sudo chown root:root /etc/systemd/system/update-db-token.timer",
       "sudo chmod 644 /etc/systemd/system/docker-compose-app.service",
+      "sudo chmod 644 /etc/systemd/system/update-db-token.service",
+      "sudo chmod 644 /etc/systemd/system/update-db-token.timer",
       "sudo systemctl daemon-reload",
       "sudo systemctl enable docker-compose-app.service"
+      "sudo systemctl enable update-db-token.service"
+      "sudo systemctl enable update-db-token.timer"
     ]
   }
 }
