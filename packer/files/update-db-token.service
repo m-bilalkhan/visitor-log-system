@@ -3,4 +3,5 @@ Description=Update RDS IAM Auth Token
 
 [Service]
 Type=oneshot
+WorkingDirectory=/home/ec2-user/app
 ExecStart=/bin/bash update-db-token.sh
