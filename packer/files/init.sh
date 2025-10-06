@@ -26,7 +26,13 @@ PARAMS=$(aws ssm get-parameters-by-path \
 # -------------------------------------
 echo "$PARAMS" | while read Name Value; do
   Key=$(basename "$Name")
-  echo "${Key^^}=$Value" >> "$ENV_FILE"
+  UpperKey="${Key^^}"
+  
+  # Remove any existing line starting with KEY= (case-insensitive)
+  sed -i "/^${UpperKey}=/Id" "$ENV_FILE"
+  
+  # Add the new key=value line
+  echo "${UpperKey}=$Value" >> "$ENV_FILE"
 done
 
 # -------------------------------------
