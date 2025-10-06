@@ -63,6 +63,7 @@ build {
       "IMG_TAG=${var.img_tag}",
       "PROJECT_NAME=visitor-log-system",
       "ENV=${var.environment}",
+      "AWS_REGION=${var.region}",
       "EOF"
     ]
   }
