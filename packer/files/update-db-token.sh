@@ -2,8 +2,7 @@
 set -e
 
 ENV_FILE="/home/ec2-user/app/.env"
-REGION="${region}"
-
+REGION="$(grep '^AWS_REGION=' "$ENV_FILE" | cut -d'=' -f2)"
 DB_HOST=$(grep '^DB_HOST=' "$ENV_FILE" | cut -d'=' -f2)
 DB_PORT=$(grep '^DB_PORT=' "$ENV_FILE" | cut -d'=' -f2)
 DB_USER=$(grep '^DB_USER=' "$ENV_FILE" | cut -d'=' -f2)
