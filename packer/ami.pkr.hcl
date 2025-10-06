@@ -61,6 +61,8 @@ build {
       "TAG_NAME=${var.tag_name}",
       "ECR_REG=${var.ecr_registry}",
       "IMG_TAG=${var.img_tag}",
+      "PROJECT_NAME=visitor-log-system",
+      "ENV=${var.environment}",
       "EOF"
     ]
   }
@@ -107,13 +109,13 @@ build {
 
   # Set permissions for ecr login
   provisioner "file" {
-    source      = "./files/ecr-login.sh"
-    destination = "/home/ec2-user/app/ecr-login.sh"
+    source      = "./files/init.sh"
+    destination = "/home/ec2-user/app/init.sh"
   }
 
   provisioner "shell" {
     inline = [
-      "chmod +x /home/ec2-user/app/ecr-login.sh"
+      "chmod +x /home/ec2-user/app/init.sh"
     ]
   }
 
@@ -147,9 +149,9 @@ build {
       "sudo chmod 644 /etc/systemd/system/update-db-token.service",
       "sudo chmod 644 /etc/systemd/system/update-db-token.timer",
       "sudo systemctl daemon-reload",
-      "sudo systemctl enable docker-compose-app.service",
       "sudo systemctl enable update-db-token.service",
       "sudo systemctl enable update-db-token.timer"
+      "sudo systemctl enable docker-compose-app.service",
     ]
   }
 }
