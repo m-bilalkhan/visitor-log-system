@@ -18,7 +18,7 @@ const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   ssl: {
-    ca: fs.readFileSync('../certs/rds.pem').toString(),
+    ca: fs.readFileSync('./rds.pem').toString(),
   }
 });
 
