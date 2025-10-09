@@ -13,7 +13,18 @@ ENV_FILE="/home/ec2-user/app/.env"
 aws configure set region "$REGION"
 
 # -------------------------------------
-# 2. Fetch parameters from SSM
+# 2. Get IAM role name from EC2 metadata
+# -------------------------------------
+IAM_ROLE=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ || true)
+
+if [[ -z "$IAM_ROLE" ]]; then
+  echo "❌ Unable to detect IAM role from EC2 metadata."
+  exit 1
+fi
+echo "DB_USER=$IAM_ROLE" >> "$ENV_FILE"
+
+# -------------------------------------
+# 3. Fetch parameters from SSM
 # -------------------------------------
 PARAMS=$(aws ssm get-parameters-by-path \
   --path "$ENV_PATH" \
@@ -22,7 +33,7 @@ PARAMS=$(aws ssm get-parameters-by-path \
   --output text)
 
 # -------------------------------------
-# 3. Write parameters to .env file
+# 4. Write parameters to .env file
 # -------------------------------------
 echo "$PARAMS" | while read Name Value; do
   Key=$(basename "$Name")
@@ -36,7 +47,7 @@ echo "$PARAMS" | while read Name Value; do
 done
 
 # -------------------------------------
-# 4. ECR Login  
+# 5. ECR Login  
 # -------------------------------------
 aws ecr get-login-password --region "$REGION" \
   | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
