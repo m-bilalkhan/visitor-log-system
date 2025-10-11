@@ -12,7 +12,7 @@ if [ -n "$DB_HOST" ] && [ -n "$DB_USER" ]; then
     --hostname "$DB_HOST" \
     --port "${DB_PORT:-5432}" \
     --region "$REGION" \
-    --username "$DB_USER")
+    --username "$DB_USER" | cut -d'?' -f2-)
 
   # Remove old DB_PASSWORD and add new one
   sed -i '/^DB_PASSWORD=/d' "$ENV_FILE"
