@@ -2,7 +2,7 @@
 Description=Run token updater every 10 minutes
 
 [Timer]
-OnBootSec=1min
+OnBootSec=2min
 OnUnitActiveSec=10min
 Persistent=true
 

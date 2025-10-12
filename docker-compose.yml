@@ -13,10 +13,8 @@ services:
       PORT: 3001
     ports:
       - "3001:3001"
+    network_mode: host
     restart: unless-stopped
-    networks:
-      - visitor-log-network
-      - host-network
 
   frontend:
     image: ${ECR_REG}/visitor-log-system/frontend:${IMG_TAG}
@@ -35,5 +33,3 @@ volumes:
 networks:
   visitor-log-network:
     driver: bridge
-  host-network:
-    driver: host
