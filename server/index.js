@@ -29,10 +29,7 @@ app.use(express.json());
 
 // Test database connection
 pool.connect((err, client, release) => {
-  if (err) {
-    console.log(process.env.DB_HOST,process.env.DB_PORT,process.env.DB_NAME,process.env.DB_USER,process.env.DB_PASSWORD);
-    console.log(fs.readFileSync('./server/rds.pem').toString());
-    
+  if (err) {    
     console.error('Error connecting to database:', err.stack);
   } else {
     console.log('Connected to PostgreSQL database');
