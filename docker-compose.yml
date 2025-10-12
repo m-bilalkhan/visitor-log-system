@@ -16,6 +16,7 @@ services:
     restart: unless-stopped
     networks:
       - visitor-log-network
+      - host-network
 
   frontend:
     image: ${ECR_REG}/visitor-log-system/frontend:${IMG_TAG}
@@ -34,3 +35,5 @@ volumes:
 networks:
   visitor-log-network:
     driver: bridge
+  host-network:
+    driver: host

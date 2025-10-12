@@ -21,6 +21,7 @@ if [[ -z "$IAM_ROLE" ]]; then
   echo "❌ Unable to detect IAM role from EC2 metadata."
   exit 1
 fi
+sed -i '/^DB_USER=/d' "$ENV_FILE"
 echo "DB_USER=$IAM_ROLE" >> "$ENV_FILE"
 
 # -------------------------------------
